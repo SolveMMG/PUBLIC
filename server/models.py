@@ -1,75 +1,105 @@
-from sqlalchemy.orm import validates
-from sqlalchemy import MetaData, UniqueConstraint, ForeignKey, Table
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import validates
+from sqlalchemy_serializer import SerializerMixin
 
-metadata = MetaData(naming_convention={
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-})
+# Create an instance of the SQLAlchemy class
+db = SQLAlchemy()
 
-db = SQLAlchemy(metadata=metadata)
+# Pizza class representing the 'pizzas' table
+class Pizza(db.Model, SerializerMixin):
+    __tablename__ = 'pizzas'
 
-# Many-to-Many Relationship Table
-user_photo_interaction = Table(
-    'user_photo_interaction',
-    db.Model.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('photo_id', db.Integer, db.ForeignKey('photo.id'))
-)
-
-# User model
-class User(db.Model):
+    # Columns in the 'pizzas' table
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(50), nullable=False)
-    photos = db.relationship('Photo', backref='user', lazy=True)
-    likes = db.relationship('Like', backref='user', lazy=True)
+    name = db.Column(db.String, nullable=False)
+    toppings = db.Column(db.String, nullable=False)
 
-    def serialize(self):
+    # Relationship with the 'RestaurantPizza' table
+    restaurant_pizzas = db.relationship('RestaurantPizza', backref='pizza', cascade='all, delete-orphan')
+
+    # Validation for the 'toppings' column
+    @validates('toppings')
+    def validate_toppings(self, key, value):
+        if not value:
+            raise ValueError("Toppings must be present")
+        return value
+
+    # Repr method for better representation
+    def __repr__(self):
+        return f"Pizza(id={self.id}, name='{self.name}', toppings='{self.toppings}')"
+
+    # Add the missing to_dict method
+    def to_dict(self):
         return {
             'id': self.id,
-            'username': self.username
+            'name': self.name,
+            'toppings': self.toppings
+        }
+
+# Restaurant class representing the 'restaurants' table
+class Restaurant(db.Model, SerializerMixin):
+    __tablename__ = 'restaurants'
+
+    # Columns in the 'restaurants' table
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    location = db.Column(db.String, nullable=False)
+
+    # Relationship with the 'RestaurantPizza' table
+    restaurant_pizzas = db.relationship('RestaurantPizza', backref='restaurant', cascade='all, delete-orphan')
+
+    # Repr method for better representation
+    def __repr__(self):
+        return f"Restaurant(id={self.id}, name='{self.name}', location='{self.location}')"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'location': self.location,
             # Add other fields as needed
         }
 
+    def to_dict_with_pizzas(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'location': self.location,
+            'pizzas': [pizza.to_dict() for pizza in self.restaurant_pizzas]
+        }
 
-# Photo model
-class Photo(db.Model):
+# RestaurantPizza class representing the 'restaurant_pizzas' table
+class RestaurantPizza(db.Model, SerializerMixin):
+    __tablename__ = 'restaurant_pizzas'
+
+    # Columns in the 'restaurant_pizzas' table
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    likes = db.relationship('Like', backref='photo', lazy=True)
+    price = db.Column(db.Float, nullable=False)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
+    pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id'), nullable=False)
+
+    # Validation for the 'price' column
+    @validates('price')
+    def validate_price(self, key, value):
+        if not (1 <= value <= 30):
+            raise ValueError("Price must be between 1 and 30")
+        return value
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'price': self.price,
+        }
+
     
-    # New fields
-    region = db.Column(db.String(50))
-    create_time = db.Column(db.DateTime)
-    size = db.Column(db.Integer)
-    image_url = db.Column(db.String(255))  # Assuming URL length is 255 characters
-
-    def serialize(self):
+    def to_dict_with_pizzas(self):
         return {
             'id': self.id,
-            'title': self.title,
-            'description': self.description,
-            'user_id': self.user_id,
-            'region': self.region,
-            'create_time': self.create_time,
-            'size': self.size,
-            'image_url': self.image_url
-            # Add other fields as needed
+            'name': self.name,
+            'location': self.location,
+            'pizzas': [pizza.to_dict() for pizza in self.pizzas],
         }
 
-
-# Like model (many-to-many relationship between User and Photo)
-class Like(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    photo_id = db.Column(db.Integer, db.ForeignKey('photo.id'), nullable=False)
-
-    def serialize(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'photo_id': self.photo_id
-            # Add other fields as needed
-        }
+    # Repr method for better representation
+    def __repr__(self):
+        return f"RestaurantPizza(id={self.id}, price={self.price}, restaurant_id={self.restaurant_id}, pizza_id={self.pizza_id})"
