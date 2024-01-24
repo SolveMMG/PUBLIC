@@ -64,7 +64,7 @@ def create_photo():
     
     if user:
         data = request.get_json()
-        new_photo = Photo(title=data['title'], description=data['description'], user=user)
+        new_photo = Photo(title=data['title'], description=data['description'], image_url=data['image_url'], user=user)
         db.session.add(new_photo)
         db.session.commit()
         return jsonify(message="Photo created successfully"), 201

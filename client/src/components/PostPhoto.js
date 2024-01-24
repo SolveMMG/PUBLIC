@@ -4,17 +4,21 @@ import axios from 'axios';
 const PostPhoto = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('');
+  const [image_url, setImage_url] = useState('');
   const [error, setError] = useState('');
 
   const handlePostPhoto = () => {
     axios
       .post(
         '/photos',
-        { title, description, photoUrl },
+        { title, description, image_url },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
       .then(response => {
+        console.log('Title:', title);
+        console.log('Description:', description);
+        console.log('Image URL:', image_url);
+
         console.log('Photo created successfully:', response.data.message);
       })
       .catch(error => {
@@ -37,7 +41,7 @@ const PostPhoto = () => {
         </div>
         <div style={styles.formGroup}>
           <label style={styles.label}>Photo URL:</label>
-          <input type="text" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} style={styles.input} />
+          <input type="text" value={image_url} onChange={(e) => setImage_url(e.target.value)} style={styles.input} />
         </div>
         <div style={styles.formGroup}>
           <button type="button" onClick={handlePostPhoto} style={styles.button}>

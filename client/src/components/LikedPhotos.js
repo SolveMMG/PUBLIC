@@ -10,31 +10,36 @@ const LikedPhotos = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (authState.isAuthenticated) {
-      const currentUserId = authState.user.id;
-
-      // Fetch liked photos for the logged-in user with the access token
-      const config = {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      };
-
-      axios
-        .get(`/user/${currentUserId}/liked-photos`, config)
-        .then(response => {
+    const fetchData = async () => {
+      try {
+        if (authState.isAuthenticated && authState.user && authState.user.id) {
+          const currentUserId = authState.user.id;
+  
+          // Fetch liked photos for the logged-in user with the access token
+          const config = {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          };
+  
+          console.log('currentUserId:', currentUserId);
+          const response = await axios.get(`/user/${currentUserId}/liked-photos`, config);
           setLikedPhotos(response.data.liked_photos);
           setLoading(false);
-        })
-        .catch(error => {
-          setError('Error fetching liked photos. Please try again.');
+        } else {
           setLoading(false);
-          console.error('Error fetching liked photos:', error);
-        });
-    } else {
-      setLoading(false);
-    }
+        }
+      } catch (error) {
+        setError('Error fetching liked photos. Please try again.');
+        setLoading(false);
+        console.error('Error fetching liked photos:', error);
+      }
+    };
+  
+    fetchData(); // Call the fetchData function
   }, [authState]);
+  
+  
 
   return (
     <div>
