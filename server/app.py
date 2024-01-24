@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from datetime import timedelta
 from models import db, User, Photo, Like
 from flask_migrate import Migrate
 
@@ -11,6 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///photo-user.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'vsgewvwesvsgevafdsag'
 app.config['JWT_SECRET_KEY'] = 'vsgewvwesvsgevafdsag'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)  # Set to a desired expiration time
 
 
 migrate = Migrate(app, db)
@@ -226,29 +228,35 @@ def get_all_users():
     users = User.query.filter(User.id != current_user_id).all()
     return jsonify(users=[user.serialize() for user in users]), 200
 
-
-# Delete liked photo
-
-@app.route('/photos/<int:photo_id>/delete-like', methods=['DELETE'])
+@app.route('/logout', methods=['POST'])
 @jwt_required()
-def delete_like(photo_id):
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+def logout():
+    # No additional logic is needed for a simple token-based logout.
+    # The frontend will handle removing the token from localStorage.
+    return jsonify(message="Logout successful"), 200
+
+# # Delete liked photo
+
+# @app.route('/photos/<int:photo_id>/delete-like', methods=['DELETE'])
+# @jwt_required()
+# def delete_like(photo_id):
+#     current_user_id = get_jwt_identity()
+#     user = User.query.get(current_user_id)
     
-    if user:
-        photo = Photo.query.get(photo_id)
-        if photo:
-            like = Like.query.filter_by(user=user, photo=photo).first()
-            if like:
-                db.session.delete(like)
-                db.session.commit()
-                return jsonify(message="Like deleted successfully"), 200
-            else:
-                return jsonify(message="Like not found"), 404
-        else:
-            return jsonify(message="Photo not found"), 404
-    else:
-        return jsonify(message="User not found"), 404
+#     if user:
+#         photo = Photo.query.get(photo_id)
+#         if photo:
+#             like = Like.query.filter_by(user=user, photo=photo).first()
+#             if like:
+#                 db.session.delete(like)
+#                 db.session.commit()
+#                 return jsonify(message="Like deleted successfully"), 200
+#             else:
+#                 return jsonify(message="Like not found"), 404
+#         else:
+#             return jsonify(message="Photo not found"), 404
+#     else:
+#         return jsonify(message="User not found"), 404
 
 # @app.route('/users', methods=['GET'])
 # @jwt_required()
