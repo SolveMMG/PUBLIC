@@ -6,6 +6,8 @@ import { useAuth } from '../components/Contexts';
 const LikedPhotos = () => {
   const { authState } = useAuth();
   const [likedPhotos, setLikedPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (authState.isAuthenticated) {
@@ -18,19 +20,28 @@ const LikedPhotos = () => {
         },
       };
 
-      axios.get(`/user/${currentUserId}/liked-photos`, config) // Adjust the endpoint based on your backend
+      axios
+        .get(`/user/${currentUserId}/liked-photos`, config)
         .then(response => {
           setLikedPhotos(response.data.liked_photos);
+          setLoading(false);
         })
         .catch(error => {
+          setError('Error fetching liked photos. Please try again.');
+          setLoading(false);
           console.error('Error fetching liked photos:', error);
         });
+    } else {
+      setLoading(false);
     }
   }, [authState]);
 
   return (
     <div>
       <h1>Liked Photos</h1>
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {!loading && !error && likedPhotos.length === 0 && <p>No liked photos yet.</p>}
       {/* Display liked photos */}
       {likedPhotos.map(photo => (
         <div key={photo.id}>

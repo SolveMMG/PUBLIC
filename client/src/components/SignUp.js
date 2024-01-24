@@ -6,43 +6,93 @@ const SignUp = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSignUp = () => {
     axios.post('/signup', { username, password })
       .then(response => {
-        // Assuming the backend returns an access token upon successful signup
         const { access_token } = response.data;
-        // Store the token in localStorage or another secure storage method
         localStorage.setItem('token', access_token);
-        // Redirect to the home page or another desired destination
         navigate('/');
       })
       .catch(error => {
-        setError('Error signing up. Please try again.'); // Handle specific errors based on your backend
+        setError('Error signing up. Please try again.');
         console.error('SignUp Error:', error);
       });
   };
 
   return (
-    <div>
-      <h1>Sign Up</h1>
-      <form>
-        <label>
-          Username:
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Password:
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </label>
-        <br />
-        <button type="button" onClick={handleSignUp}>
+    <div
+      style={{
+        background:
+          'linear-gradient(109.6deg, rgb(43, 1, 91) 13.4%, rgb(122, 2, 54) 100.2%)',
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: "'Poppins', sans-serif",
+      }}
+    >
+      <div className="ui container" style={{ maxWidth: '200px' }}>
+        <h2
+          className="ui header centered"
+          style={{ fontSize: '40px', fontWeight: 'bold', textAlign: 'center', color: 'black' }}
+        >
           Sign Up
-        </button>
-      </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+        </h2>
+        <form
+          className="ui form"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <div
+            className="field"
+            style={{
+              margin: '10px 0',
+              textAlign: 'center',
+              width: '50%', // Updated to 50% width
+            }}
+          >
+            <label style={{ fontSize: '18px', color: 'white' }}>Username:</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="ui input mini"
+              style={{ width: '60%' }}
+            />
+          </div>
+          <div
+            className="field"
+            style={{
+              margin: '10px 0',
+              textAlign: 'center',
+              width: '50%', // Updated to 50% width
+            }}
+          >
+            <label style={{ fontSize: '18px', color: 'white' }}>Password:</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="ui input mini"
+              style={{ width: '60%' }}
+            />
+          </div>
+          <button
+            className="ui primary button"
+            type="button"
+            onClick={handleSignUp}
+            style={{ width: '100px' }}
+          >
+            Sign Up
+          </button>
+        </form>
+        {error && <p style={{ color: 'red', textAlign: 'center', marginTop: '10px' }}>{error}</p>}
+      </div>
     </div>
   );
 };

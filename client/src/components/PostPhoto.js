@@ -4,42 +4,116 @@ import axios from 'axios';
 const PostPhoto = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [error, setError] = useState('');
 
   const handlePostPhoto = () => {
-    // Assuming you have an endpoint for creating a photo in the backend
-    axios.post('/photos', { title, description }, {}, {headers: {Authorization: `Bearer ${localStorage.getItem('token') }`}})
+    axios
+      .post(
+        '/photos',
+        { title, description, photoUrl },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      )
       .then(response => {
-        // Handle successful photo creation, e.g., show a success message
         console.log('Photo created successfully:', response.data.message);
       })
       .catch(error => {
-        setError('Error posting photo. Please try again.'); // Handle specific errors based on your backend
+        setError('Error posting photo. Please try again.');
         console.error('PostPhoto Error:', error);
       });
   };
 
   return (
-    <div>
-      <h1>Post a Photo</h1>
-      <form>
-        <label>
-          Title:
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Description:
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-        </label>
-        <br />
-        <button type="button" onClick={handlePostPhoto}>
-          Post Photo
-        </button>
+    <div style={styles.container}>
+      <h1 style={styles.heading}>Post a Photo</h1>
+      <form style={styles.form}>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Title:</label>
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} style={styles.input} />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Description:</label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} style={styles.textarea} />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Photo URL:</label>
+          <input type="text" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} style={styles.input} />
+        </div>
+        <div style={styles.formGroup}>
+          <button type="button" onClick={handlePostPhoto} style={styles.button}>
+            Post Photo
+          </button>
+        </div>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={styles.error}>{error}</p>}
     </div>
   );
+};
+
+const styles = {
+  container: {
+    maxWidth: '600px',
+    margin: 'auto',
+    padding: '20px',
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    fontFamily: 'Poppins, sans-serif', // Use the Poppins font
+  },
+  heading: {
+    fontSize: '24px',
+    marginBottom: '20px',
+    color: '#333',
+  },
+  form: {
+    width: '100%',
+    maxWidth: '400px',
+  },
+  formGroup: {
+    marginBottom: '20px',
+    width: '100%',
+    textAlign: 'center',
+  },
+  label: {
+    marginBottom: '8px',
+    color: '#333',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    display: 'block',
+  },
+  input: {
+    width: '100%',
+    padding: '12px',
+    fontSize: '16px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    boxSizing: 'border-box',
+  },
+  textarea: {
+    width: '100%',
+    padding: '12px',
+    fontSize: '16px',
+    minHeight: '80px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    resize: 'vertical',
+    boxSizing: 'border-box',
+  },
+  button: {
+    backgroundColor: '#4caf50',
+    color: '#fff',
+    padding: '12px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    border: 'none',
+    borderRadius: '4px',
+  },
+  error: {
+    color: 'red',
+    marginTop: '10px',
+  },
 };
 
 export default PostPhoto;
