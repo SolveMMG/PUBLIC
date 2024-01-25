@@ -73,7 +73,7 @@ const HomePage = () => {
             <h3 style={{ marginTop: '0' }}>{photo.title}</h3>
             <p>{photo.description}</p>
             <Link to={`/photo/${photo.id}`}>
-              <button style={{ background: 'blue', color: 'white', border: 'none', padding: '10px', fontFamily: 'Poppins, sans-serif', borderRadius: '20px', marginRight: '10px', }}>
+              <button style={{ background: 'blue', color: 'white', border: 'none', padding: '10px',  borderRadius: '20px', marginRight: '10px', }}>
                 View Information
               </button>
             </Link>
