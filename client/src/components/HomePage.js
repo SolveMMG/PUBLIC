@@ -32,6 +32,7 @@ const HomePage = () => {
 
     axios.post(`/photos/${photoId}/like`, {}, config)
       .then(response => {
+        console.log('Response:', response.data);
         console.log('Photo liked successfully');
       })
       .catch(error => {

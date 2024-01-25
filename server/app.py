@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 
 app = Flask(__name__)
 CORS(app)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///photo-user.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'vsgewvwesvsgevafdsag'
@@ -157,21 +158,34 @@ def unlike_photo(photo_id):
         return jsonify(message="User not found"), 404
 
 # Get liked photos by a specific user
-
 @app.route('/user/<int:user_id>/liked-photos', methods=['GET'])
 @jwt_required()
 def get_liked_photos_by_user(user_id):
     current_user_id = get_jwt_identity()
-    
+
     if current_user_id == user_id:
         user = User.query.get(user_id)
-        liked_photos = Photo.query.join(Like).filter(Like.user_id == user_id).all()
-        return jsonify(liked_photos=[photo.serialize() for photo in liked_photos]), 200
+        liked_photos = (
+            db.session.query(Photo)
+            .join(Like)
+            .filter(Like.user_id == user_id)
+            .all()
+        )
+        return jsonify(
+            liked_photos=[
+                {
+                    'id': photo.id,
+                    'title': photo.title,
+                    'description': photo.description,
+                    'image_url': photo.image_url,
+                }
+                for photo in liked_photos
+            ]
+        ), 200
     else:
-        return jsonify(message="Unauthorized access"), 401
+        # Return an empty array if unauthorized
+        return jsonify(liked_photos=[]), 200
 
-
-# Get extra photo information
 
 @app.route('/photos/<int:photo_id>/extra-info', methods=['GET'])
 def get_extra_photo_info(photo_id):
