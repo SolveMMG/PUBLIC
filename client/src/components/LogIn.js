@@ -56,15 +56,17 @@ const LogIn = () => {
     <div
       style={{
         background:
-          "linear-gradient(109.6deg, rgb(43, 1, 91) 13.4%, rgb(122, 2, 54) 100.2%)",
+          "linear-gradient(109.6deg, rgb(36, 45, 57) 11.2%, rgb(16, 37, 60) 51.2%, rgb(0, 0, 0) 98.6%)",
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: "'Poppins', sans-serif",
+        margin: 0, // Reset margin on body
+        padding: 0, // Reset padding on body
       }}
     >
-      <div className="ui container" style={{ maxWidth: "200px" }}>
+      <div className="ui container" style={{ maxWidth: "200px", height: "100%" }}>
         <h2 className="ui header centered" style={{ fontSize: "40px", fontWeight: "bold", textAlign: "center" }}>
           Login
         </h2>

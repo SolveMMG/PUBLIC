@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import { Container, Image, Message } from 'semantic-ui-react';
+import 'semantic-ui-css/semantic.min.css';
 
 const PhotoInformation = () => {
   const { photoId } = useParams();
@@ -31,18 +33,17 @@ const PhotoInformation = () => {
   }, [photoId]);
 
   return (
-    <div>
-      <h1>Photo Information</h1>
-      <div>
-        <img src={photo.image_url} alt={photo.title} />
-        <p>Title: {photo.title}</p>
-        <p>Description: {photo.description}</p>
-        <p>Region: {extraInfo.region}</p>
-        <p>Create Time: {extraInfo.create_time}</p>
-        <p>Size: {extraInfo.size}</p>
+    <Container style={{ marginTop: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ fontWeight: 'bold' }}>Photo Information</h1>
+
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Image src={photo.image_url} alt={photo.title} size='large' rounded style={{ marginBottom: '10px', borderRadius: '15px' }} />
+        <p style={{ fontWeight: 'bold' }}><strong>Title:</strong> {photo.title}</p>
+        <p style={{ fontWeight: 'bold' }}><strong>Description:</strong> {photo.description}</p>
       </div>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </div>
+
+      {error && <Message negative>{error}</Message>}
+    </Container>
   );
 };
 

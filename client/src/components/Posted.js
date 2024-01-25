@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Button, Container, Card, Image, Message } from 'semantic-ui-react';
+import 'semantic-ui-css/semantic.min.css';
 
 const Posted = () => {
   const [userPosts, setUserPosts] = useState([]);
@@ -50,24 +52,37 @@ const Posted = () => {
   };
 
   return (
-    <div>
+    <Container>
       <h1>Posted Photos</h1>
-      {userPosts.map(photo => (
-        <div key={photo.id}>
-          <img src={photo.image_url} alt={photo.title} />
-          <p>{photo.title}</p>
-          <p>{photo.description}</p>
-          <Link to={`/photo/${photo.id}`}>
-            <button>
-              View Information
-            </button>
-          </Link>
-          {/* Add delete button */}
-          <button onClick={() => handleDelete(photo.id)}>Delete</button>
-        </div>
-      ))}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </div>
+
+      {userPosts.length === 0 && (
+        <Message info>
+          <Message.Header>No posted photos available.</Message.Header>
+        </Message>
+      )}
+
+      <Card.Group>
+        {userPosts.map(photo => (
+          <Card key={photo.id}>
+            <Image src={photo.image_url} alt={photo.title} />
+            <Card.Content>
+              <Card.Header>{photo.title}</Card.Header>
+              <Card.Description>{photo.description}</Card.Description>
+            </Card.Content>
+            <Card.Content extra>
+              <Link to={`/photo/${photo.id}`}>
+                <Button primary>View Information</Button>
+              </Link>
+              <Button color='red' onClick={() => handleDelete(photo.id)}>
+                Delete
+              </Button>
+            </Card.Content>
+          </Card>
+        ))}
+      </Card.Group>
+
+      {error && <Message negative>{error}</Message>}
+    </Container>
   );
 };
 

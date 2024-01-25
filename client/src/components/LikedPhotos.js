@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../components/Contexts';
+import { Card, Image, Container, Header, Message, Grid } from 'semantic-ui-react';
+import 'semantic-ui-css/semantic.min.css';
 
 const LikePhotos = () => {
   const [likedPhotos, setLikedPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { dispatch } = useAuth();
+  const [hoveredCard, setHoveredCard] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,15 +22,14 @@ const LikePhotos = () => {
           return;
         }
 
-        // Parse the token (assuming it's a JWT) to get user ID
         const [, payloadBase64] = token.split('.');
         const payload = JSON.parse(atob(payloadBase64));
-        
-        console.log('Decoded payload:', payload); // Add this line for debugging
-        
-        const currentUserId = payload.sub; // Use the correct field for user ID
 
-        console.log('Current user ID:', currentUserId); // Add this line for debugging
+        console.log('Decoded payload:', payload);
+
+        const currentUserId = payload.sub;
+
+        console.log('Current user ID:', currentUserId);
 
         const response = await axios.get(`/user/${currentUserId}/liked-photos`, {
           headers: {
@@ -56,7 +58,6 @@ const LikePhotos = () => {
         },
       });
 
-      // Remove the unliked photo from the state
       setLikedPhotos((prevPhotos) => prevPhotos.filter((photo) => photo.id !== photoId));
     } catch (error) {
       console.error('Error unliking photo:', error);
@@ -64,33 +65,43 @@ const LikePhotos = () => {
   };
 
   return (
-    <div  >
-      <h1 >Liked Photos</h1>
+    <Container>
+      <Header as="h1" dividing>
+        Liked Photos
+      </Header>
+
       {loading && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
+      {error && <Message negative>{`Error: ${error}`}</Message>}
+      
       {!loading && !error && likedPhotos.length === 0 && (
-        <p>No liked photos available.</p>
+        <Message info>
+          <Message.Header>No liked photos available.</Message.Header>
+        </Message>
       )}
+
       {!loading && !error && likedPhotos.length > 0 && (
-        <div class="ui grid" >
-          <div class="four wide column">
-          <ul>
-            {likedPhotos.map((photo) => (
-              <div class="ui card">
-              <li key={photo.id}>
-                <img class="image" src={photo.image_url} alt={photo.title} />
-                <p>Title: {photo.title}</p>
-                <p>Description: {photo.description}</p>
-                {/* Add unlike button */}
-                <button onClick={() => handleUnlike(photo.id)}>Unlike</button>
-              </li>
-              </div>
-            ))}
-          </ul>
-          </div>
-        </div>
+        <Grid columns={4} stackable doubling style={{ gap: '20px' }}>
+          {likedPhotos.map((photo) => (
+            <Grid.Column key={photo.id} style={{ transition: 'transform 0.3s', transform: hoveredCard === photo.id ? 'scale(1.05)' : 'scale(1)' }}
+              onMouseEnter={() => setHoveredCard(photo.id)}
+              onMouseLeave={() => setHoveredCard(null)}>
+              <Card fluid style={{ borderRadius: '20px 20px 20px 20px' }}>
+                <Image src={photo.image_url} alt={photo.title} wrapped ui={false} style={{ borderRadius: '20px 20px 20px 20px' }} />
+                <Card.Content style={{ borderRadius: '20px 20px 20px 20px' }}>
+                  <Card.Header>{photo.title}</Card.Header>
+                  <Card.Description>{photo.description}</Card.Description>
+                </Card.Content>
+                <Card.Content extra>
+                  <button className="ui button red" onClick={() => handleUnlike(photo.id)}>
+                    Unlike
+                  </button>
+                </Card.Content>
+              </Card>
+            </Grid.Column>
+          ))}
+        </Grid>
       )}
-    </div>
+    </Container>
   );
 };
 
